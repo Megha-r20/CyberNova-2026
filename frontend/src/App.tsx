@@ -4,6 +4,7 @@ import LandingPage from './components/LandingPage';
 import EventDetails from './components/EventDetails';
 import Registration from './components/Registration';
 import Success from './components/Success';
+import Admin from './components/Admin';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -22,8 +23,10 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/event-details" element={<EventDetails />} />
+        <Route path="/register" element={<Registration />} />
         <Route path="/registration" element={<Registration />} />
         <Route path="/success" element={<Success />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>
   );

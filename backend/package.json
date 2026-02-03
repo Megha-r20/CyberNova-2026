@@ -8,16 +8,27 @@
     "dev": "nodemon server.js",
     "test": "echo \"Testing not yet implemented\" && exit 0"
   },
-  "keywords": ["cybernova", "registration", "excel", "api"],
+  "keywords": [
+    "cybernova",
+    "registration",
+    "excel",
+    "api"
+  ],
   "author": "CyberNova Team",
   "license": "MIT",
   "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^17.2.3",
+    "async-mutex": "^0.5.0",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "exceljs": "^4.4.0",
-    "express": "^5.2.1"
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "nodemon": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

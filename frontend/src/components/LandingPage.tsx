@@ -1,168 +1,192 @@
-import React from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { Zap, Calendar, Clock, MapPin, Shield, Users } from 'lucide-react';
+import { Shield, Users, Calendar, Clock, MapPin, Zap } from 'lucide-react';
 
-const LandingPage = () => {
+export default function LandingPage() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-black text-white overflow-hidden relative selection:bg-cyan-500/30 selection:text-cyan-400">
-            {/* Animated Grid Background */}
-            <div className="fixed inset-0 z-0 opacity-20 pointer-events-none"
-                style={{
-                    backgroundImage: 'linear-gradient(to right, #00FFFF 1px, transparent 1px), linear-gradient(to bottom, #00FFFF 1px, transparent 1px)',
+        <div className="min-h-screen bg-black text-white overflow-hidden">
+            {/* Animated Background Grid */}
+            <div className="fixed inset-0 opacity-20">
+                <div className="absolute inset-0" style={{
+                    backgroundImage: `linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                           linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)`,
                     backgroundSize: '50px 50px'
-                }}>
-                <motion.div
-                    className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"
-                    animate={{ opacity: [0.5, 0.8, 0.5] }}
-                    transition={{ duration: 4, repeat: Infinity }}
-                />
+                }} />
             </div>
 
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32">
-
-                {/* Hero Section */}
-                <div className="flex flex-col items-center text-center">
-
+            {/* Hero Section */}
+            <section className="relative min-h-screen flex items-center justify-center px-4 py-20">
+                <div className="max-w-7xl mx-auto text-center">
+                    {/* Top Badge */}
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-500/50 bg-cyan-500/10 mb-8 backdrop-blur-sm"
+                        className="inline-flex items-center gap-2 px-4 py-2 mb-8 border border-cyan-500/50 bg-cyan-500/10 rounded-full"
                     >
                         <Zap className="w-4 h-4 text-cyan-400" />
-                        <span className="text-cyan-400 font-bold tracking-wider text-sm">HYBRID EVENT • LIMITED SLOTS</span>
+                        <span className="text-sm tracking-wider text-cyan-400">HYBRID EVENT • LIMITED SLOTS</span>
                     </motion.div>
 
+                    {/* Main Headline */}
                     <motion.h1
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="flex flex-col items-center justify-center font-black tracking-tighter mb-4"
+                        className="mb-6"
                     >
-                        <span className="text-6xl md:text-8xl lg:text-9xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 drop-shadow-[0_0_15px_rgba(0,255,255,0.5)]">
+                        <div className="text-6xl md:text-8xl lg:text-9xl tracking-tighter mb-4"
+                            style={{
+                                fontWeight: 900,
+                                textShadow: '0 0 40px rgba(0, 255, 255, 0.5)',
+                                letterSpacing: '-0.05em'
+                            }}>
                             CYBERNOVA
-                        </span>
-                        <span className="text-4xl md:text-6xl lg:text-7xl text-cyan-400 mt-2 filter drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
+                        </div>
+                        <div className="text-4xl md:text-6xl lg:text-7xl tracking-tight text-cyan-400"
+                            style={{ fontWeight: 700 }}>
                             SERIES 2026
-                        </span>
+                        </div>
                     </motion.h1>
 
+                    {/* Tagline */}
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 0.4 }}
-                        className="text-xl md:text-2xl text-gray-300 tracking-wide font-light mb-12 max-w-3xl"
+                        className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto"
                     >
                         Where Cyber Security Meets Innovation
                     </motion.p>
 
-                    {/* Date/Time Cards */}
+                    {/* Date & Time Blocks */}
                     <motion.div
-                        initial={{ opacity: 0, y: 30 }}
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
-                        className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mb-16"
+                        className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-12"
                     >
-                        {[
-                            { icon: Calendar, title: "EVENT DATES", value: "Feb 16 – Feb 19" },
-                            { icon: Clock, title: "DAILY TIME", value: "5:00 PM – 6:00 PM" },
-                            { icon: MapPin, title: "MODE", value: "Hybrid Event" }
-                        ].map((item, idx) => (
-                            <div key={idx} className="group relative p-6 border border-cyan-500/30 bg-cyan-900/5 backdrop-blur-sm hover:border-cyan-400/60 transition-colors duration-300">
-                                <div className="absolute inset-0 bg-cyan-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                <div className="relative flex flex-col items-center">
-                                    <item.icon className="w-8 h-8 text-cyan-400 mb-3" />
-                                    <h3 className="text-cyan-400/80 text-sm font-bold tracking-widest mb-1">{item.title}</h3>
-                                    <p className="text-xl font-bold text-white">{item.value}</p>
-                                </div>
-                            </div>
-                        ))}
+                        <div className="border border-cyan-500/30 bg-cyan-500/5 p-6 backdrop-blur-sm">
+                            <Calendar className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
+                            <div className="text-sm text-gray-400 mb-1">EVENT DATES</div>
+                            <div className="text-xl tracking-tight">Feb 16 – Feb 19</div>
+                        </div>
+                        <div className="border border-cyan-500/30 bg-cyan-500/5 p-6 backdrop-blur-sm">
+                            <Clock className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
+                            <div className="text-sm text-gray-400 mb-1">DAILY TIME</div>
+                            <div className="text-xl tracking-tight">5:00 PM – 6:00 PM</div>
+                        </div>
+                        <div className="border border-cyan-500/30 bg-cyan-500/5 p-6 backdrop-blur-sm">
+                            <MapPin className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
+                            <div className="text-sm text-gray-400 mb-1">MODE</div>
+                            <div className="text-xl tracking-tight">Hybrid Event</div>
+                        </div>
                     </motion.div>
 
-                    {/* CTA Buttons */}
+                    {/* CTAs */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.8 }}
-                        className="flex flex-col md:flex-row gap-6 w-full md:w-auto mb-8"
+                        className="flex flex-col sm:flex-row gap-4 justify-center items-center"
                     >
                         <button
                             onClick={() => navigate('/event-details')}
-                            className="px-8 py-4 text-cyan-400 border-2 border-cyan-400 font-bold text-lg tracking-wide hover:bg-cyan-400 hover:text-black transition-all duration-300 uppercase min-w-[200px]"
+                            className="px-8 py-4 bg-transparent border-2 border-cyan-400 text-cyan-400 text-lg tracking-wide hover:bg-cyan-400 hover:text-black transition-all duration-300 w-full sm:w-auto"
                         >
-                            Explore Event
+                            EXPLORE EVENT
                         </button>
                         <button
                             onClick={() => navigate('/registration')}
-                            className="px-8 py-4 bg-cyan-400 text-black font-black text-lg tracking-wide hover:bg-cyan-300 hover:shadow-[0_0_20px_rgba(0,255,255,0.4)] transition-all duration-300 uppercase min-w-[200px]"
+                            className="px-8 py-4 bg-cyan-400 text-black text-lg tracking-wide hover:bg-cyan-300 transition-all duration-300 w-full sm:w-auto"
+                            style={{ fontWeight: 700 }}
                         >
-                            Register Now
+                            REGISTER NOW
                         </button>
                     </motion.div>
 
+                    {/* Urgency Message */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 1 }}
-                        className="flex items-center gap-2 text-yellow-400/90 font-medium tracking-wide bg-yellow-400/10 px-4 py-2 rounded-full border border-yellow-400/20"
+                        className="mt-8 text-sm text-gray-400"
                     >
-                        <Zap className="w-4 h-4 fill-current" />
-                        <span>Limited slots available • Team of 5 required • ₹1750 per team</span>
+                        ⚡ Limited slots available • Team of 5 required • ₹1750 per team
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* Credibility Section */}
+            <section className="relative py-20 px-4 border-t border-cyan-500/20">
+                <div className="max-w-7xl mx-auto">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        className="text-center mb-12"
+                    >
+                        <h2 className="text-3xl md:text-5xl tracking-tight mb-4" style={{ fontWeight: 700 }}>
+                            ORGANIZED BY
+                        </h2>
                     </motion.div>
 
-                </div>
+                    <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6 }}
+                            className="border border-cyan-500/30 bg-cyan-500/5 p-8 backdrop-blur-sm"
+                        >
+                            <Shield className="w-12 h-12 text-cyan-400 mb-4" />
+                            <h3 className="text-2xl mb-2" style={{ fontWeight: 700 }}>OWASP & CyberNerds</h3>
+                            <p className="text-gray-400">Student Chapter</p>
+                        </motion.div>
 
-                {/* Credibility Section */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1 }}
-                    className="mt-32 border-t border-cyan-500/20 pt-16"
-                >
-                    <h2 className="text-center text-cyan-500/50 text-sm font-bold tracking-[0.2em] mb-12">ORGANIZED BY</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                        <div className="flex items-center gap-6 p-6 border border-cyan-500/20 bg-cyan-900/5">
-                            <Shield className="w-12 h-12 text-cyan-400 flex-shrink-0" />
-                            <div>
-                                <h3 className="text-xl font-bold text-white mb-1">OWASP & CyberNerds</h3>
-                                <p className="text-gray-400">Student Chapter</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-6 p-6 border border-cyan-500/20 bg-cyan-900/5">
-                            <Users className="w-12 h-12 text-cyan-400 flex-shrink-0" />
-                            <div>
-                                <h3 className="text-xl font-bold text-white mb-1">KARE</h3>
-                                <p className="text-gray-400">Kalasalingam Academy of Research and Education</p>
-                            </div>
-                        </div>
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6 }}
+                            className="border border-cyan-500/30 bg-cyan-500/5 p-8 backdrop-blur-sm"
+                        >
+                            <Users className="w-12 h-12 text-cyan-400 mb-4" />
+                            <h3 className="text-2xl mb-2" style={{ fontWeight: 700 }}>KARE</h3>
+                            <p className="text-gray-400">Kalasalingam Academy of Research and Education</p>
+                        </motion.div>
                     </div>
-                </motion.div>
+                </div>
+            </section>
 
-                {/* Final CTA */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.8 }}
-                    className="mt-32 text-center"
-                >
-                    <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">READY TO COMPETE?</h2>
-                    <p className="text-xl text-gray-400 mb-8">Workshop + Team-Based Competitive Series</p>
-                    <button
-                        onClick={() => navigate('/registration')}
-                        className="px-10 py-5 bg-transparent border border-cyan-500/50 text-cyan-400 font-bold text-xl hover:bg-cyan-400 hover:text-black hover:border-cyan-400 transition-all duration-300"
+            {/* Final CTA Section */}
+            <section className="relative py-20 px-4 border-t border-cyan-500/20">
+                <div className="max-w-4xl mx-auto text-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
                     >
-                        SECURE YOUR SPOT
-                    </button>
-                </motion.div>
-
-            </div>
+                        <h2 className="text-3xl md:text-5xl tracking-tight mb-6" style={{ fontWeight: 700 }}>
+                            READY TO COMPETE?
+                        </h2>
+                        <p className="text-xl text-gray-300 mb-8">
+                            Workshop + Team-Based Competitive Series
+                        </p>
+                        <button
+                            onClick={() => navigate('/registration')}
+                            className="px-12 py-5 bg-cyan-400 text-black text-xl tracking-wide hover:bg-cyan-300 transition-all duration-300"
+                            style={{ fontWeight: 700 }}
+                        >
+                            SECURE YOUR SPOT
+                        </button>
+                    </motion.div>
+                </div>
+            </section>
         </div>
     );
-};
-
-export default LandingPage;
+}
