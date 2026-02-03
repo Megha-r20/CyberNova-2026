@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cyan-400: #22d3ee; /* Tailwind default for cyan-400 is not #00FFFF, but user asked for #00FFFF/cyan-400, I will use #00FFFF */
+  --color-cyan-500: #06b6d4;
+  
+  /* User requested #00FFFF as cyan-400 */
+  --color-neon-cyan: #00FFFF;
+}
+
+:root {
+  --color-cyan-400: #00FFFF;
+}
+
+body {
+  background-color: #000000;
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00FFFF;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00cccc;
+}
