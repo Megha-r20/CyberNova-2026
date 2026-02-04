@@ -19,7 +19,7 @@ export default function LandingPage() {
             </div>
 
             {/* Hero Section */}
-            <section className="relative md:min-h-screen flex items-center justify-center px-4 py-16 md:py-20">
+            <section className="relative md:min-h-screen flex items-center justify-center px-4 pt-16 pb-0 md:py-20">
                 <div className="max-w-7xl mx-auto text-center">
                     {/* Top Badge */}
                     <motion.div
@@ -58,7 +58,8 @@ export default function LandingPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 0.4 }}
-                        className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto"
+                        transition={{ duration: 0.8, delay: 0.4 }}
+                        className="text-xl md:text-2xl text-gray-300 mb-8 md:mb-12 max-w-3xl mx-auto"
                     >
                         Where Cyber Security Meets Innovation
                     </motion.p>
@@ -68,7 +69,8 @@ export default function LandingPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
-                        className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-12"
+                        transition={{ duration: 0.8, delay: 0.6 }}
+                        className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8 md:mb-12"
                     >
                         <div className="border border-cyan-500/30 bg-cyan-500/5 p-6 backdrop-blur-sm">
                             <Calendar className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
@@ -114,7 +116,8 @@ export default function LandingPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 1 }}
-                        className="mt-8 text-sm text-gray-400"
+                        transition={{ duration: 0.8, delay: 1 }}
+                        className="mt-2 md:mt-8 text-sm text-gray-400"
                     >
                         ⚡ Limited slots available • Free Registration
                     </motion.div>
@@ -122,14 +125,15 @@ export default function LandingPage() {
             </section>
 
             {/* Credibility Section */}
-            <section className="relative py-12 md:py-20 px-4 border-t border-cyan-500/20">
+            <section className="relative pt-4 pb-12 md:py-20 px-4 border-t border-cyan-500/20">
                 <div className="max-w-7xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="text-center mb-12"
+                        transition={{ duration: 0.6 }}
+                        className="text-center mb-8 md:mb-12"
                     >
                         <h2 className="text-3xl md:text-5xl tracking-tight mb-4" style={{ fontWeight: 700 }}>
                             ORGANIZED BY
