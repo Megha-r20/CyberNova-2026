@@ -168,15 +168,20 @@ app.post('/api/register', async (req, res) => {
 
     console.log('✅ MongoDB Save:', fullName);
 
-    // 2. Save to Local Backup (JSON + Excel)
-    await mutex.runExclusive(async () => {
-      const localData = await readLocalData();
-      const plain = savedDoc.toObject();
-      plain.timestamp = plain.timestamp.toISOString();
-      localData.push(plain);
+    // 2. Save to Local Backup (JSON + Excel) - BACKGROUND PROCESS
+    // We do NOT await this so the user gets an instant response
+    mutex.runExclusive(async () => {
+      try {
+        const localData = await readLocalData();
+        const plain = savedDoc.toObject();
+        plain.timestamp = plain.timestamp.toISOString();
+        localData.push(plain);
 
-      await writeLocalData(localData);
-      await updateLocalExcel(localData);
+        await writeLocalData(localData);
+        await updateLocalExcel(localData);
+      } catch (err) {
+        console.error('⚠️ Background backup failed:', err.message);
+      }
     });
 
     res.status(201).json({ success: true, message: 'Registration successful' });
