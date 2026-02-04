@@ -334,6 +334,7 @@ export default function Registration() {
                                             } p-4 text-white focus:outline-none focus:border-cyan-400 transition-colors`}
                                     >
                                         <option value="">Select year</option>
+                                        <option value="1st">1st Year</option>
                                         <option value="2nd">2nd Year</option>
                                         <option value="3rd">3rd Year</option>
                                         <option value="4th">4th Year</option>
@@ -407,7 +408,7 @@ export default function Registration() {
                                         WHATSAPP GROUP JOINED? *
                                     </label>
                                     <a
-                                        href="https://chat.whatsapp.com/YOUR_INVITE_CODE"
+                                        href="https://chat.whatsapp.com/K32X11n8XrgIrdcSCKq3Cs?mode=gi_t"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-cyan-400 text-xs md:text-sm flex items-center gap-1 hover:text-cyan-300 transition-colors"
@@ -478,15 +479,15 @@ export default function Registration() {
                             <ul className="space-y-2 text-sm text-gray-400">
                                 <li className="flex items-start gap-2">
                                     <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                                    <span>Ensure all information matches your official college records</span>
+                                    <span>Ensure details match official college records</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                                    <span>You will receive a confirmation email within 24 hours</span>
+                                    <span>Free in-person workshop (no fee)</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                                    <span>Registration fee: ₹1,750 per team (payment details will be shared via email)</span>
+                                    <span>Venue block details will be shared via WhatsApp group</span>
                                 </li>
                             </ul>
                         </motion.div>

@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { CheckCircle, Download, MessageCircle, Home, User, GraduationCap } from 'lucide-react';
+import { CheckCircle, MessageCircle, Home, User, GraduationCap, Hash, Mail, Layout, Phone } from 'lucide-react';
 import { useEffect } from 'react';
 
 export default function Success() {
@@ -19,13 +19,8 @@ export default function Success() {
         return null;
     }
 
-    const handleDownloadGuide = () => {
-        // Mock download - In production, this would download an actual PDF
-        alert('Event guide download will be available after payment confirmation');
-    };
-
     const handleJoinWhatsApp = () => {
-        window.open('https://chat.whatsapp.com/YOUR_INVITE_CODE', '_blank');
+        window.open('https://chat.whatsapp.com/K32X11n8XrgIrdcSCKq3Cs?mode=gi_t', '_blank');
     };
 
     return (
@@ -100,7 +95,8 @@ export default function Success() {
                             <h2 className="text-2xl mb-6 text-cyan-400" style={{ fontWeight: 700 }}>
                                 YOUR SUBMISSION
                             </h2>
-                            <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Full Name */}
                                 <div className="flex items-start gap-3">
                                     <User className="w-5 h-5 text-cyan-400 mt-1 flex-shrink-0" />
                                     <div>
@@ -108,11 +104,52 @@ export default function Success() {
                                         <div className="text-lg">{formData.fullName}</div>
                                     </div>
                                 </div>
+                                {/* Registration Number */}
+                                <div className="flex items-start gap-3">
+                                    <Hash className="w-5 h-5 text-cyan-400 mt-1 flex-shrink-0" />
+                                    <div>
+                                        <div className="text-sm text-gray-400 mb-1">Registration Number</div>
+                                        <div className="text-lg">{formData.registrationNumber}</div>
+                                    </div>
+                                </div>
+                                {/* Email */}
+                                <div className="flex items-start gap-3">
+                                    <Mail className="w-5 h-5 text-cyan-400 mt-1 flex-shrink-0" />
+                                    <div>
+                                        <div className="text-sm text-gray-400 mb-1">College Email ID</div>
+                                        <div className="text-lg break-all">{formData.email}</div>
+                                    </div>
+                                </div>
+                                {/* Year */}
                                 <div className="flex items-start gap-3">
                                     <GraduationCap className="w-5 h-5 text-cyan-400 mt-1 flex-shrink-0" />
                                     <div>
                                         <div className="text-sm text-gray-400 mb-1">Year of Study</div>
                                         <div className="text-lg">{formData.year} Year</div>
+                                    </div>
+                                </div>
+                                {/* Section */}
+                                <div className="flex items-start gap-3">
+                                    <Layout className="w-5 h-5 text-cyan-400 mt-1 flex-shrink-0" />
+                                    <div>
+                                        <div className="text-sm text-gray-400 mb-1">Section</div>
+                                        <div className="text-lg">{formData.section}</div>
+                                    </div>
+                                </div>
+                                {/* Mobile */}
+                                <div className="flex items-start gap-3">
+                                    <Phone className="w-5 h-5 text-cyan-400 mt-1 flex-shrink-0" />
+                                    <div>
+                                        <div className="text-sm text-gray-400 mb-1">Mobile Number</div>
+                                        <div className="text-lg">{formData.mobile}</div>
+                                    </div>
+                                </div>
+                                {/* WhatsApp */}
+                                <div className="flex items-start gap-3">
+                                    <MessageCircle className="w-5 h-5 text-cyan-400 mt-1 flex-shrink-0" />
+                                    <div>
+                                        <div className="text-sm text-gray-400 mb-1">WhatsApp Group Joined?</div>
+                                        <div className="text-lg">{formData.whatsappJoined}</div>
                                     </div>
                                 </div>
                             </div>
@@ -136,40 +173,10 @@ export default function Success() {
                                     </div>
                                     <div>
                                         <h3 className="text-lg mb-2" style={{ fontWeight: 700 }}>
-                                            Check Your Email
-                                        </h3>
-                                        <p className="text-gray-400 text-sm">
-                                            You will receive a confirmation email at <span className="text-cyan-400">{formData.email}</span> within 24 hours with payment instructions and further details.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-4">
-                                    <div className="w-8 h-8 rounded-full bg-cyan-400 text-black flex items-center justify-center flex-shrink-0"
-                                        style={{ fontWeight: 700 }}>
-                                        2
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg mb-2" style={{ fontWeight: 700 }}>
                                             Join WhatsApp Group
                                         </h3>
                                         <p className="text-gray-400 text-sm">
-                                            The official WhatsApp group link will be shared via email for event updates, announcements, and coordination.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-4">
-                                    <div className="w-8 h-8 rounded-full bg-cyan-400 text-black flex items-center justify-center flex-shrink-0"
-                                        style={{ fontWeight: 700 }}>
-                                        3
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg mb-2" style={{ fontWeight: 700 }}>
-                                            Download Event Guide
-                                        </h3>
-                                        <p className="text-gray-400 text-sm">
-                                            Access the comprehensive event guide with schedule, rules, themes, and preparation materials.
+                                            The official WhatsApp group is the ONLY channel for updates. All venue details, schedules, and instructions will be shared here.
                                         </p>
                                     </div>
                                 </div>
@@ -192,14 +199,6 @@ export default function Success() {
                             </button>
 
                             <button
-                                onClick={handleDownloadGuide}
-                                className="w-full px-8 py-4 bg-transparent border-2 border-cyan-400 text-cyan-400 text-lg tracking-wide hover:bg-cyan-400 hover:text-black transition-all duration-300 flex items-center justify-center gap-3"
-                            >
-                                <Download className="w-5 h-5" />
-                                DOWNLOAD EVENT GUIDE
-                            </button>
-
-                            <button
                                 onClick={() => navigate('/')}
                                 className="w-full px-8 py-4 bg-cyan-400 text-black text-lg tracking-wide hover:bg-cyan-300 transition-all duration-300 flex items-center justify-center gap-3"
                                 style={{ fontWeight: 700 }}
@@ -209,46 +208,10 @@ export default function Success() {
                             </button>
                         </motion.div>
 
-                        {/* Support Contact */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.6, delay: 0.6 }}
-                            className="mt-12 text-center"
-                        >
-                            <p className="text-sm text-gray-500 mb-2">
-                                Questions or concerns?
-                            </p>
-                            <p className="text-sm text-gray-400">
-                                Contact us at <a href="mailto:support@cybernova.edu" className="text-cyan-400 hover:text-cyan-300">support@cybernova.edu</a>
-                            </p>
-                        </motion.div>
+
 
                         {/* Important Reminder */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.7 }}
-                            className="mt-8 border border-yellow-500/30 bg-yellow-500/5 p-6 backdrop-blur-sm"
-                        >
-                            <h3 className="text-lg mb-3 text-yellow-400" style={{ fontWeight: 700 }}>
-                                ⚠️ IMPORTANT REMINDER
-                            </h3>
-                            <ul className="space-y-2 text-sm text-gray-400">
-                                <li className="flex items-start gap-2">
-                                    <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full mt-2 flex-shrink-0" />
-                                    <span>Complete team formation (5 members) within 48 hours</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full mt-2 flex-shrink-0" />
-                                    <span>Registration fee payment deadline will be specified in the confirmation email</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full mt-2 flex-shrink-0" />
-                                    <span>Attendance is mandatory for all 4 sessions (Feb 16-19, 5:00-6:00 PM)</span>
-                                </li>
-                            </ul>
-                        </motion.div>
+
                     </div>
                 </div>
             </div>

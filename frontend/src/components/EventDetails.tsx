@@ -1,36 +1,26 @@
 
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, Users, MapPin, Shield, Code, AlertTriangle, Eye, Wrench, BookOpen, ArrowRight, Home } from 'lucide-react';
+import { Calendar, Clock, Users, MapPin, Shield, BookOpen, ArrowRight, Home, Github, Terminal, Wrench } from 'lucide-react';
 
 export default function EventDetails() {
     const navigate = useNavigate();
 
     const themes = [
         {
-            icon: Shield,
-            title: 'Web Application Security',
-            description: 'Deep dive into OWASP Top 10 vulnerabilities and defense strategies'
+            icon: Github,
+            title: 'GitHub',
+            description: 'Learn version control fundamentals, repositories, branching, pull requests, and collaboration workflows using GitHub.'
         },
         {
-            icon: Eye,
-            title: 'Penetration Testing',
-            description: 'Hands-on ethical hacking techniques and vulnerability assessment'
-        },
-        {
-            icon: Code,
-            title: 'Secure Coding Practices',
-            description: 'Learn to write bulletproof code that resists common attacks'
-        },
-        {
-            icon: AlertTriangle,
-            title: 'Security Awareness',
-            description: 'Build a security-first mindset for the modern threat landscape'
+            icon: Terminal,
+            title: 'Linux',
+            description: 'Understand Linux basics, essential commands, file systems, permissions, and terminal usage for developers and security professionals.'
         },
         {
             icon: Wrench,
-            title: 'Open Source Security Tools',
-            description: 'Master industry-standard tools for security testing and analysis'
+            title: 'Cybersecurity Tools',
+            description: 'Get hands-on exposure to commonly used cybersecurity tools for security analysis, testing, and basic threat assessment.'
         }
     ];
 
@@ -114,10 +104,10 @@ export default function EventDetails() {
                             </div>
 
                             <div className="border border-cyan-500/30 bg-cyan-500/5 p-6 backdrop-blur-sm">
-                                <Users className="w-10 h-10 text-cyan-400 mb-4" />
-                                <div className="text-sm text-gray-400 mb-2">TEAM SIZE</div>
-                                <div className="text-2xl tracking-tight">Exactly 5</div>
-                                <div className="text-sm text-gray-500 mt-2">Members Required</div>
+                                <Clock className="w-10 h-10 text-cyan-400 mb-4" />
+                                <div className="text-sm text-gray-400 mb-2">Post-Session Daily Schedule</div>
+                                <div className="text-2xl tracking-tight">8:00 PM – 9:00 PM</div>
+                                <div className="text-sm text-gray-500 mt-2">Interactive 1-Hour Daily Quiz Sessions</div>
                             </div>
                         </motion.div>
 
@@ -139,15 +129,9 @@ export default function EventDetails() {
                                 <p className="text-gray-400">Anand Nagar, Krishnankoil</p>
                                 <p className="text-gray-400">Srivilliputhur, Tamil Nadu 626126</p>
 
-                                <div className="mt-6 pt-6 border-t border-cyan-500/20 flex flex-wrap justify-center gap-8">
-                                    <div className="flex items-center gap-2 text-cyan-400/80">
-                                        <MapPin className="w-5 h-5" />
-                                        <span>Campus Map Available at Gate</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-cyan-400/80">
-                                        <Shield className="w-5 h-5" />
-                                        <span>ID Card Mandatory</span>
-                                    </div>
+                                <div className="mt-8 pt-6 border-t border-cyan-500/20">
+                                    <h4 className="text-lg text-cyan-400 mb-2" style={{ fontWeight: 700 }}>Exact Block / Hall Details</h4>
+                                    <p className="text-gray-300">Will be announced later in the official WhatsApp group</p>
                                 </div>
                             </div>
                         </motion.div>
@@ -197,31 +181,35 @@ export default function EventDetails() {
                                 <div className="space-y-4 text-gray-300">
                                     <div className="flex items-start gap-3">
                                         <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                                        <p>Open to all undergraduate students (2nd, 3rd, and 4th year)</p>
+                                        <p>Open to all undergraduate students (1st, 2nd, 3rd, and 4th year)</p>
                                     </div>
                                     <div className="flex items-start gap-3">
                                         <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                                        <p>Teams must consist of exactly 5 members</p>
+                                        <p>This is an in-person workshop; participants must be present on campus</p>
                                     </div>
                                     <div className="flex items-start gap-3">
                                         <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                                        <p>Registration fee: ₹1,750 per team (non-refundable)</p>
+                                        <p>No registration fee – participation is completely free of cost</p>
                                     </div>
                                     <div className="flex items-start gap-3">
                                         <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                                        <p>All team members must attend all 4 sessions</p>
+                                        <p>Individual participation (no team requirement)</p>
                                     </div>
                                     <div className="flex items-start gap-3">
                                         <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                                        <p>Valid college email ID required for registration</p>
+                                        <p>Participants are encouraged to attend all workshop sessions</p>
                                     </div>
                                     <div className="flex items-start gap-3">
                                         <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                                        <p>Basic knowledge of programming recommended but not mandatory</p>
+                                        <p>Valid college ID card is mandatory for entry</p>
                                     </div>
                                     <div className="flex items-start gap-3">
                                         <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                                        <p>Certificates will be provided upon successful completion</p>
+                                        <p>Basic interest in technology is sufficient (prior experience not required)</p>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
+                                        <p>Certificates will be provided upon successful participation</p>
                                     </div>
                                 </div>
                             </div>

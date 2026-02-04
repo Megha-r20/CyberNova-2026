@@ -116,7 +116,7 @@ export default function LandingPage() {
                         transition={{ duration: 0.8, delay: 1 }}
                         className="mt-8 text-sm text-gray-400"
                     >
-                        ⚡ Limited slots available • Team of 5 required • ₹1750 per team
+                        ⚡ Limited slots available • Free Registration
                     </motion.div>
                 </div>
             </section>
