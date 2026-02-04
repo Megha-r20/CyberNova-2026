@@ -164,18 +164,7 @@ app.get('/api/admin/download', verifyAdmin, async (req, res) => {
   }
 });
 
-// ───────────────────────────────
-// CLEAR ALL DATA
-// ───────────────────────────────
-app.delete('/api/admin/clear-all', verifyAdmin, async (req, res) => {
-  try {
-    await Registration.deleteMany({});
-    console.log('⚠️ All registration data cleared from MongoDB');
-    res.json({ success: true, message: 'All data cleared' });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Failed to clear data' });
-  }
-});
+
 
 // ───────────────────────────────
 // HEALTH CHECK

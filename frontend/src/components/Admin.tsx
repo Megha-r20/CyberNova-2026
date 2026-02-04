@@ -127,29 +127,6 @@ export default function Admin() {
     }
   };
 
-  const handleClearData = async () => {
-    if (!confirm('⚠️ WARNING: This will PERMANENTLY DELETE ALL registrations.\n\nAre you sure you want to proceed?')) return;
-
-    const doubleCheck = prompt('To confirm deletion, type "DELETE" below:');
-    if (doubleCheck !== 'DELETE') return;
-
-    try {
-      const response = await fetch(`${API_BASE}/api/admin/clear-all`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        alert('✅ Database Cleared');
-        fetchData(token);
-      } else {
-        alert('❌ Failed to clear data');
-      }
-    } catch {
-      alert('❌ Error connecting to server');
-    }
-  };
-
   // Filter registrations
   const filteredRegistrations = registrations.filter(reg =>
     reg.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -336,14 +313,6 @@ export default function Admin() {
                 title="Refresh Data"
               >
                 <RefreshCw className={`w-6 h-6 ${isRefreshing ? 'animate-spin' : ''}`} />
-              </button>
-
-              <button
-                onClick={handleClearData}
-                className="px-4 py-4 border border-red-500/30 text-red-500 hover:bg-red-500/10 hover:text-red-400 transition-all font-bold whitespace-nowrap"
-                title="Clear All Data"
-              >
-                RESET DB
               </button>
 
               <button
