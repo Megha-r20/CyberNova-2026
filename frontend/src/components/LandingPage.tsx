@@ -1,11 +1,32 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Zap, Clock } from "lucide-react";
 
-
+const API_BASE = import.meta.env.VITE_API_URL as string;
 
 export default function LandingPage() {
     const navigate = useNavigate();
+    const [slotsLeft, setSlotsLeft] = useState<number | null>(null);
+
+    useEffect(() => {
+        const fetchSlots = async () => {
+            try {
+                const response = await fetch(`${API_BASE}/api/slots-left`);
+                const data = await response.json();
+                if (data.success) {
+                    setSlotsLeft(data.slotsLeft);
+                }
+            } catch (error) {
+                console.error("Failed to fetch slots", error);
+            }
+        };
+
+        fetchSlots(); // Initial fetch
+        const interval = setInterval(fetchSlots, 5000); // Poll every 5 seconds
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className="min-h-screen bg-black text-white overflow-hidden">
@@ -29,7 +50,13 @@ export default function LandingPage() {
                         className="inline-flex items-center gap-2 px-4 py-2 mb-8 border border-cyan-500/50 bg-cyan-500/10 rounded-full"
                     >
                         <Zap className="w-4 h-4 text-cyan-400" />
-                        <span className="text-sm tracking-wider text-cyan-400">IN-PERSON EVENT • LIMITED SLOTS</span>
+                        <span className="text-sm tracking-wider text-cyan-400 font-bold">
+                            {slotsLeft !== null ? (
+                                slotsLeft === 0 ? 'REGISTRATION FULL' : `IN-PERSON EVENT • ONLY ${slotsLeft} SLOTS LEFT`
+                            ) : (
+                                'IN-PERSON EVENT • LIMITED SLOTS'
+                            )}
+                        </span>
                     </motion.div>
 
                     {/* Main Headline */}
@@ -102,10 +129,10 @@ export default function LandingPage() {
                         </button>
                         <button
                             onClick={() => navigate('/registration')}
-                            className="px-8 py-4 bg-cyan-400 text-black text-lg tracking-wide hover:bg-cyan-300 transition-all duration-300 w-full sm:w-auto"
-                            style={{ fontWeight: 700 }}
+                            disabled={slotsLeft === 0}
+                            className={`px-8 py-4 text-black text-lg tracking-wide transition-all duration-300 w-full sm:w-auto font-bold ${slotsLeft === 0 ? 'bg-gray-500 cursor-not-allowed' : 'bg-cyan-400 hover:bg-cyan-300'}`}
                         >
-                            REGISTER NOW
+                            {slotsLeft === 0 ? 'REGISTRATION CLOSED' : 'REGISTER NOW'}
                         </button>
                     </motion.div>
 
@@ -116,7 +143,7 @@ export default function LandingPage() {
                         transition={{ duration: 0.8, delay: 1 }}
                         className="mt-2 md:mt-8 text-sm text-gray-400"
                     >
-                        ⚡ Limited slots available • Free Registration
+                        ⚡ {slotsLeft !== null && slotsLeft < 20 ? 'Hurry! Few slots remaining' : 'Limited slots available'} • Free Registration
                     </motion.div>
                 </div>
             </section>
@@ -189,10 +216,10 @@ export default function LandingPage() {
                         </p>
                         <button
                             onClick={() => navigate('/registration')}
-                            className="px-12 py-5 bg-cyan-400 text-black text-xl tracking-wide hover:bg-cyan-300 transition-all duration-300"
-                            style={{ fontWeight: 700 }}
+                            disabled={slotsLeft === 0}
+                            className={`px-12 py-5 text-xl tracking-wide transition-all duration-300 font-bold ${slotsLeft === 0 ? 'bg-gray-500 cursor-not-allowed' : 'bg-cyan-400 text-black hover:bg-cyan-300'}`}
                         >
-                            SECURE YOUR SPOT
+                            {slotsLeft === 0 ? 'REGISTRATION CLOSED' : 'SECURE YOUR SPOT'}
                         </button>
                     </motion.div>
                 </div>
@@ -200,3 +227,4 @@ export default function LandingPage() {
         </div>
     );
 }
+

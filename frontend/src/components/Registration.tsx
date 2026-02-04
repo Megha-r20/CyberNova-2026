@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { Home, AlertCircle, Loader2, ExternalLink } from 'lucide-react';
+import { Home, AlertCircle, Loader2, ExternalLink, Lock } from 'lucide-react';
 
 interface FormData {
     fullName: string;
@@ -23,8 +23,13 @@ interface FormErrors {
     whatsappJoined?: string;
 }
 
+const API_BASE = import.meta.env.VITE_API_URL as string;
+
 export default function Registration() {
     const navigate = useNavigate();
+    const [slotsLeft, setSlotsLeft] = useState<number | null>(null);
+    const [isLoadingSlots, setIsLoadingSlots] = useState(true);
+
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
         registrationNumber: '',
@@ -40,6 +45,24 @@ export default function Registration() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [apiError, setApiError] = useState('');
 
+    useEffect(() => {
+        const checkSlots = async () => {
+            try {
+                const response = await fetch(`${API_BASE}/api/slots-left`);
+                const data = await response.json();
+                if (data.success) {
+                    setSlotsLeft(data.slotsLeft);
+                }
+            } catch (error) {
+                console.error("Failed to check slots", error);
+            } finally {
+                setIsLoadingSlots(false);
+            }
+        };
+
+        checkSlots();
+    }, []);
+
     // Validation functions
     const validateField = (name: string, value: string): string => {
         switch (name) {
@@ -50,7 +73,6 @@ export default function Registration() {
 
             case 'registrationNumber':
                 if (!value.trim()) return 'Registration number is required';
-                // Relaxed: Allow any format (User request: IDs might contain / or -)
                 return '';
 
             case 'email':
@@ -68,7 +90,6 @@ export default function Registration() {
 
             case 'mobile':
                 if (!value.trim()) return 'Mobile number is required';
-                // Relaxed: Allow any format (User request)
                 return '';
 
             case 'whatsappJoined':
@@ -96,10 +117,8 @@ export default function Registration() {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
 
-        // Clear API error when user starts typing
         if (apiError) setApiError('');
 
-        // Validate on change if field has been touched
         if (touched.has(name)) {
             const error = validateField(name, value);
             setErrors(prev => ({ ...prev, [name]: error }));
@@ -116,10 +135,8 @@ export default function Registration() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Mark all fields as touched
         setTouched(new Set(Object.keys(formData)));
 
-        // Validate form
         if (!validateForm()) {
             return;
         }
@@ -128,10 +145,7 @@ export default function Registration() {
         setApiError('');
 
         try {
-            // Get API URL from environment or use default
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-            const response = await fetch(`${apiUrl}/api/register`, {
+            const response = await fetch(`${API_BASE}/api/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -142,17 +156,15 @@ export default function Registration() {
             const data = await response.json();
 
             if (!response.ok) {
-                // Handle specific error types
                 if (response.status === 409) {
                     throw new Error(data.message || 'This information is already registered');
                 } else if (response.status === 400) {
-                    throw new Error(data.message || 'Invalid registration data. Please check your inputs.');
+                    throw new Error(data.message || 'Registration failed. Slots might be full or data is invalid.');
                 } else {
                     throw new Error(data.message || 'Registration failed. Please try again.');
                 }
             }
 
-            // Navigate to success page with form data
             navigate('/success', { state: { formData } });
 
         } catch (error) {
@@ -165,6 +177,49 @@ export default function Registration() {
     const isFormValid = Object.keys(formData).every(key =>
         formData[key as keyof FormData].trim() !== ''
     ) && Object.values(errors).every(error => !error);
+
+    if (isLoadingSlots) {
+        return (
+            <div className="min-h-screen bg-black text-white flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+            </div>
+        );
+    }
+
+    if (slotsLeft === 0) {
+        return (
+            <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 relative overflow-hidden">
+                {/* Background Grid */}
+                <div className="fixed inset-0 opacity-10">
+                    <div className="absolute inset-0" style={{
+                        backgroundImage: `linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                               linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)`,
+                        backgroundSize: '50px 50px'
+                    }} />
+                </div>
+
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="max-w-md w-full text-center relative z-10"
+                >
+                    <div className="border border-red-500/30 bg-red-900/10 p-8 backdrop-blur-md rounded-lg">
+                        <Lock className="w-16 h-16 text-red-500 mx-auto mb-6" />
+                        <h1 className="text-3xl font-bold mb-4 text-white">REGISTRATION CLOSED</h1>
+                        <p className="text-red-300 mb-8 text-lg">
+                            All 100 slots for CyberNova Series 2026 have been filled.
+                        </p>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="px-8 py-3 bg-red-600 text-white font-bold rounded hover:bg-red-500 transition-colors"
+                        >
+                            RETURN HOME
+                        </button>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-black text-white">
@@ -228,6 +283,7 @@ export default function Registration() {
                                 <div className="text-red-300">{apiError}</div>
                             </motion.div>
                         )}
+
 
                         {/* Registration Form */}
                         <motion.form

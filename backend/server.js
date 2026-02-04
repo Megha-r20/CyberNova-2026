@@ -27,6 +27,11 @@ const ADMIN_PASSWORD = 'CyberNova@2026';
 const JWT_SECRET = process.env.JWT_SECRET || 'cybernova_secret_key';
 
 // ───────────────────────────────
+// CONSTANTS
+// ───────────────────────────────
+const TOTAL_SLOTS = 100;
+
+// ───────────────────────────────
 // DATABASE CONNECTION
 // ───────────────────────────────
 connectDB();
@@ -61,10 +66,29 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 // ───────────────────────────────
+// PUBLIC: GET SLOTS LEFT
+// ───────────────────────────────
+app.get('/api/slots-left', async (req, res) => {
+  try {
+    const count = await Registration.countDocuments();
+    const slotsLeft = Math.max(0, TOTAL_SLOTS - count);
+    res.json({ success: true, slotsLeft, totalRegistered: count });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error fetching slots' });
+  }
+});
+
+// ───────────────────────────────
 // REGISTER USER
 // ───────────────────────────────
 app.post('/api/register', async (req, res) => {
   try {
+    // Check Slot Availability
+    const currentCount = await Registration.countDocuments();
+    if (currentCount >= TOTAL_SLOTS) {
+      return res.status(400).json({ success: false, message: 'Registration closed. All slots are full.' });
+    }
+
     const {
       fullName,
       registrationNumber,
@@ -102,6 +126,7 @@ app.post('/api/register', async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
 
 // ───────────────────────────────
 // ADMIN DATA
