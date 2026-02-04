@@ -29,7 +29,6 @@ export default function Admin() {
 
   // Login
   const [password, setPassword] = useState('');
-  const [token, setToken] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   /* =======================
@@ -55,7 +54,6 @@ export default function Admin() {
         throw new Error(result.message || 'Invalid password');
       }
 
-      setToken(result.token);
       setAuthorized(true);
       fetchData(result.token);
     } catch {
@@ -82,7 +80,6 @@ export default function Admin() {
         setRegistrations(result.data.reverse());
       } else {
         setAuthorized(false);
-        setToken(null);
       }
     } catch {
       alert('❌ Failed to fetch data');
