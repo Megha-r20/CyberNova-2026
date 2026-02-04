@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import EventDetails from './components/EventDetails';
@@ -9,7 +9,7 @@ import Admin from './components/Admin';
 const ScrollToTop = () => {
   const { pathname } = useLocation();
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
 

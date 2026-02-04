@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Home, Loader2, Lock, RefreshCw, Download, LogOut, ShieldCheck, Database, Search } from 'lucide-react';
