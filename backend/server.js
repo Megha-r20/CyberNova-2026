@@ -1,65 +1,111 @@
 /**
  * CYBERNOVA SERIES 2026 – PRODUCTION BACKEND
- * JSON Storage + JWT + Multiple Admins + Thread-Safe Writes
+ * Hybrid Storage: MongoDB (Cloud) + JSON/Excel (Local Backup)
  */
 
 const express = require('express');
 const cors = require('cors');
 const ExcelJS = require('exceljs');
+const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs').promises;
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const { Mutex } = require('async-mutex');
 require('dotenv').config();
 
-const app = express();
-const PORT = process.env.PORT || 3002; // CHANGED TO 3002 TO FIX STUCK PROCESS
+const connectDB = require('./db');
+const Registration = require('./models/Registration');
 
+const app = express();
+const PORT = process.env.PORT || 3002;
+
+// ───────────────────────────────
+// FILE STORAGE CONFIG
+// ───────────────────────────────
 const DATA_DIR = path.join(__dirname, 'data');
 const JSON_FILE = path.join(DATA_DIR, 'registrations.json');
+const EXCEL_FILE = path.join(DATA_DIR, 'cybernova_registrations.xlsx');
+const mutex = new Mutex();
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 
-/* ───────────────────────────────
-   ADMIN PASSWORD
-─────────────────────────────── */
-const ADMIN_PASSWORD = 'CyberNova@2026'; // Change this to your desired password
-
+// ───────────────────────────────
+// ADMIN CONFIG
+// ───────────────────────────────
+const ADMIN_PASSWORD = 'CyberNova@2026';
 const JWT_SECRET = process.env.JWT_SECRET || 'cybernova_secret_key';
 
-/* ───────────────────────────────
-   INITIALIZE JSON FILE
-─────────────────────────────── */
+// ───────────────────────────────
+// DATABASE CONNECTION
+// ───────────────────────────────
+connectDB();
+
+// ───────────────────────────────
+// FILE HELPERS
+// ───────────────────────────────
 async function initDataFile() {
   await fs.mkdir(DATA_DIR, { recursive: true });
-
   try {
     await fs.access(JSON_FILE);
-    console.log('✓ JSON file exists');
   } catch {
-    console.log('⚠ Creating new JSON file...');
     await fs.writeFile(JSON_FILE, JSON.stringify([], null, 2));
-    console.log('✓ JSON file created');
   }
 }
 
-/* ───────────────────────────────
-   READ/WRITE JSON DATA
-─────────────────────────────── */
-async function readData() {
-  const content = await fs.readFile(JSON_FILE, 'utf-8');
-  return JSON.parse(content);
+async function readLocalData() {
+  try {
+    const content = await fs.readFile(JSON_FILE, 'utf-8');
+    return JSON.parse(content);
+  } catch {
+    return [];
+  }
 }
 
-async function writeData(data) {
+async function writeLocalData(data) {
   await fs.writeFile(JSON_FILE, JSON.stringify(data, null, 2));
 }
 
-/* ───────────────────────────────
-   JWT MIDDLEWARE
-─────────────────────────────── */
+async function updateLocalExcel(data) {
+  try {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Registrations');
+
+    ws.columns = [
+      { header: 'Full Name', key: 'fullName', width: 25 },
+      { header: 'Registration Number', key: 'registrationNumber', width: 20 },
+      { header: 'Email', key: 'email', width: 30 },
+      { header: 'Year', key: 'year', width: 10 },
+      { header: 'Section', key: 'section', width: 10 },
+      { header: 'Mobile', key: 'mobile', width: 15 },
+      { header: 'WhatsApp Joined', key: 'whatsappJoined', width: 18 },
+      { header: 'Timestamp', key: 'timestamp', width: 25 }
+    ];
+
+    ws.getRow(1).font = { bold: true };
+
+    data.forEach(row => {
+      ws.addRow({
+        fullName: row.fullName,
+        registrationNumber: row.registrationNumber,
+        email: row.email,
+        year: row.year,
+        section: row.section,
+        mobile: row.mobile,
+        whatsappJoined: row.whatsappJoined ? 'Yes' : 'No',
+        timestamp: new Date(row.timestamp).toISOString()
+      });
+    });
+
+    await wb.xlsx.writeFile(EXCEL_FILE);
+    console.log('📊 Excel backup updated');
+  } catch (err) {
+    console.error('⚠️ Excel update failed:', err.message);
+  }
+}
+
+// ───────────────────────────────
+// JWT MIDDLEWARE
+// ───────────────────────────────
 function verifyAdmin(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth?.startsWith('Bearer ')) {
@@ -74,250 +120,160 @@ function verifyAdmin(req, res, next) {
   }
 }
 
-/* ───────────────────────────────
-   ADMIN LOGIN
-─────────────────────────────── */
+// ───────────────────────────────
+// ADMIN LOGIN
+// ───────────────────────────────
 app.post('/api/admin/login', (req, res) => {
-  const { password } = req.body;
-
-  console.log('🔑 Login attempt. Password received:', password ? password.substring(0, 3) + '...' : 'undefined');
-  console.log('🔑 Expected:', ADMIN_PASSWORD.substring(0, 3) + '...');
-
-  if (password !== ADMIN_PASSWORD) {
-    console.log('❌ Password mismatch');
+  if (req.body.password !== ADMIN_PASSWORD) {
     return res.status(401).json({ success: false, message: 'Invalid password' });
   }
 
-  const token = jwt.sign(
-    { admin: true },
-    JWT_SECRET,
-    { expiresIn: '6h' }
-  );
-
+  const token = jwt.sign({ admin: true }, JWT_SECRET, { expiresIn: '6h' });
   res.json({ success: true, token });
 });
 
-/* ───────────────────────────────
-   REGISTER USER (THREAD SAFE)
-─────────────────────────────── */
-const mutex = new Mutex();
-
-const EXCEL_FILE = path.join(DATA_DIR, 'cybernova_registrations.xlsx');
-
-/* ───────────────────────────────
-   SYNC TO EXCEL (BEST EFFORT)
-─────────────────────────────── */
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function syncToExcel(data) {
-  let attempt = 0;
-  while (attempt < MAX_RETRIES) {
-    try {
-      const wb = new ExcelJS.Workbook();
-      const ws = wb.addWorksheet('Registrations');
-
-      ws.columns = [
-        { header: 'Full Name', key: 'fullName', width: 25 },
-        { header: 'Registration Number', key: 'registrationNumber', width: 20 },
-        { header: 'Email', key: 'email', width: 30 },
-        { header: 'Year', key: 'year', width: 10 },
-        { header: 'Section', key: 'section', width: 10 },
-        { header: 'Mobile', key: 'mobile', width: 15 },
-        { header: 'WhatsApp', key: 'whatsappJoined', width: 15 },
-        { header: 'Timestamp', key: 'timestamp', width: 25 }
-      ];
-
-      ws.getRow(1).font = { bold: true };
-      data.forEach(row => ws.addRow(row));
-
-      await wb.xlsx.writeFile(EXCEL_FILE);
-      console.log('📊 Excel file updated automatically');
-      return; // Success, exit function
-    } catch (error) {
-      attempt++;
-      console.error(`⚠️ Excel sync failed (Attempt ${attempt}/${MAX_RETRIES}):`, error.message);
-
-      if (attempt < MAX_RETRIES) {
-        console.log(`⏳ Retrying in ${RETRY_DELAY / 1000}s...`);
-        await sleep(RETRY_DELAY);
-      } else {
-        console.error('❌ Excel sync gave up after max retries. Data is saved in JSON but EXCEL IS OUT OF SYNC.');
-      }
-    }
-  }
-}
-
+// ───────────────────────────────
+// REGISTER USER (FIXED BOOLEAN ISSUE)
+// ───────────────────────────────
 app.post('/api/register', async (req, res) => {
   try {
-    const data = {
-      fullName: req.body.fullName,
-      registrationNumber: req.body.registrationNumber,
-      email: req.body.email,
-      year: req.body.year,
-      section: req.body.section,
-      mobile: req.body.mobile,
-      whatsappJoined: req.body.whatsappJoined,
-      timestamp: new Date().toISOString()
-    };
+    const {
+      fullName,
+      registrationNumber,
+      email,
+      year,
+      section,
+      mobile,
+      whatsappJoined
+    } = req.body;
 
-    console.log('📝 New registration:', data.fullName);
+    // ✅ Normalize WhatsApp Joined to Boolean
+    const normalizedWhatsappJoined =
+      whatsappJoined === true ||
+      whatsappJoined === 'Yes' ||
+      whatsappJoined === 'yes' ||
+      whatsappJoined === 'true' ||
+      whatsappJoined === 1;
 
+    // 1. Save to MongoDB
+    const savedDoc = await Registration.create({
+      fullName,
+      registrationNumber,
+      email,
+      year,
+      section,
+      mobile,
+      whatsappJoined: normalizedWhatsappJoined
+    });
+
+    console.log('✅ MongoDB Save:', fullName);
+
+    // 2. Save to Local Backup (JSON + Excel)
     await mutex.runExclusive(async () => {
-      const registrations = await readData();
-      const beforeCount = registrations.length;
-      console.log('📊 Registrations before:', beforeCount);
+      const localData = await readLocalData();
+      const plain = savedDoc.toObject();
+      plain.timestamp = plain.timestamp.toISOString();
+      localData.push(plain);
 
-      registrations.push(data);
-      await writeData(registrations);
-      console.log('💾 Data written to JSON');
-
-      // Verify write
-      const verify = await readData();
-      const afterCount = verify.length;
-      console.log('✅ Verification - Registrations after:', afterCount);
-
-      if (afterCount <= beforeCount) {
-        throw new Error('Data not persisted!');
-      }
-
-      console.log('✅ Registration saved and verified:', data.fullName);
-
-      // Auto-update Excel (Fire and forget, but await to ensure order in mutex)
-      await syncToExcel(registrations);
+      await writeLocalData(localData);
+      await updateLocalExcel(localData);
     });
 
     res.status(201).json({ success: true, message: 'Registration successful' });
-  } catch (error) {
-    console.error('❌ Registration error:', error.message);
-    res.status(500).json({ success: false, message: 'Registration failed: ' + error.message });
+  } catch (err) {
+    console.error('❌ Registration error:', err.message);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
-/* ───────────────────────────────
-   ADMIN DATA
-─────────────────────────────── */
+// ───────────────────────────────
+// ADMIN DATA
+// ───────────────────────────────
 app.get('/api/admin/data', verifyAdmin, async (req, res) => {
-  try {
-    const data = await readData();
-    res.json({ success: true, data, count: data.length });
-  } catch (error) {
-    console.error('❌ Error fetching data:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch data' });
-  }
+  const data = await Registration.find().sort({ timestamp: -1 });
+  res.json({ success: true, data, count: data.length });
 });
 
-/* ───────────────────────────────
-   DOWNLOAD EXCEL
-─────────────────────────────── */
+// ───────────────────────────────
+// DOWNLOAD EXCEL (FROM MONGODB)
+// ───────────────────────────────
 app.get('/api/admin/download', verifyAdmin, async (req, res) => {
-  try {
-    const data = await readData();
+  const data = await Registration.find().sort({ timestamp: -1 });
 
-    // Create Excel workbook
-    const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet('Registrations');
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Registrations');
 
-    ws.columns = [
-      { header: 'Full Name', key: 'fullName', width: 25 },
-      { header: 'Registration Number', key: 'registrationNumber', width: 20 },
-      { header: 'Email', key: 'email', width: 30 },
-      { header: 'Year', key: 'year', width: 10 },
-      { header: 'Section', key: 'section', width: 10 },
-      { header: 'Mobile', key: 'mobile', width: 15 },
-      { header: 'WhatsApp', key: 'whatsappJoined', width: 15 },
-      { header: 'Timestamp', key: 'timestamp', width: 25 }
-    ];
+  ws.columns = [
+    { header: 'Full Name', key: 'fullName', width: 25 },
+    { header: 'Registration Number', key: 'registrationNumber', width: 20 },
+    { header: 'Email', key: 'email', width: 30 },
+    { header: 'Year', key: 'year', width: 10 },
+    { header: 'Section', key: 'section', width: 10 },
+    { header: 'Mobile', key: 'mobile', width: 15 },
+    { header: 'WhatsApp Joined', key: 'whatsappJoined', width: 18 },
+    { header: 'Timestamp', key: 'timestamp', width: 25 }
+  ];
 
-    ws.getRow(1).font = { bold: true };
+  ws.getRow(1).font = { bold: true };
 
-    // Add data rows
-    data.forEach(row => ws.addRow(row));
-
-    // Send as download
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=cybernova_registrations.xlsx');
-
-    await wb.xlsx.write(res);
-    res.end();
-  } catch (error) {
-    console.error('❌ Download error:', error);
-    res.status(500).json({ success: false, message: 'Download failed' });
-  }
-});
-
-/* ───────────────────────────────
-   DELETE ALL DATA
-─────────────────────────────── */
-app.delete('/api/admin/clear-all', verifyAdmin, async (req, res) => {
-  try {
-    await mutex.runExclusive(async () => {
-      await writeData([]);
-      console.log('✓ All data cleared');
+  data.forEach(r => {
+    ws.addRow({
+      fullName: r.fullName,
+      registrationNumber: r.registrationNumber,
+      email: r.email,
+      year: r.year,
+      section: r.section,
+      mobile: r.mobile,
+      whatsappJoined: r.whatsappJoined ? 'Yes' : 'No',
+      timestamp: r.timestamp.toISOString()
     });
-
-    res.json({ success: true, message: 'All data cleared successfully' });
-  } catch (error) {
-    console.error('❌ Clear error:', error);
-    res.status(500).json({ success: false, message: 'Failed to clear data' });
-  }
-});
-
-/* ───────────────────────────────
-   FORCE SYNC EXCEL
-─────────────────────────────── */
-app.post('/api/admin/sync-excel', verifyAdmin, async (req, res) => {
-  try {
-    const data = await readData();
-    await syncToExcel(data);
-
-    res.json({ success: true, message: 'Excel sync triggered manually' });
-  } catch (error) {
-    console.error('❌ Manual sync error:', error);
-    res.status(500).json({ success: false, message: 'Manual sync failed: ' + error.message });
-  }
-});
-
-/* ───────────────────────────────
-   HEALTH CHECK
-─────────────────────────────── */
-app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'CyberNova API is running',
-    timestamp: new Date().toISOString()
   });
+
+  res.setHeader(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  );
+  res.setHeader(
+    'Content-Disposition',
+    'attachment; filename=cybernova_registrations.xlsx'
+  );
+
+  await wb.xlsx.write(res);
+  res.end();
 });
 
-/* ───────────────────────────────
-   START
-─────────────────────────────── */
+// ───────────────────────────────
+// CLEAR ALL DATA
+// ───────────────────────────────
+app.delete('/api/admin/clear-all', verifyAdmin, async (req, res) => {
+  await Registration.deleteMany({});
+  await mutex.runExclusive(async () => {
+    await writeLocalData([]);
+    await updateLocalExcel([]);
+  });
+
+  res.json({ success: true, message: 'All data cleared' });
+});
+
+// ───────────────────────────────
+// HEALTH CHECK
+// ───────────────────────────────
+app.get('/api/health', (req, res) => {
+  res.json({ success: true, message: 'CyberNova API running' });
+});
+
+// ───────────────────────────────
+// START SERVER
+// ───────────────────────────────
 (async () => {
   await initDataFile();
   app.listen(PORT, () => {
     console.log('\n╔════════════════════════════════════════════════════╗');
     console.log('║   CYBERNOVA SERIES 2026 - BACKEND API SERVER      ║');
     console.log('╠════════════════════════════════════════════════════╣');
-    console.log('║   🚀 SERVER RESTARTED - VERSION 3.0 (FIXED)        ║');
-    console.log(`║   🕒 Time: ${new Date().toLocaleTimeString()}                    ║`);
+    console.log('║   🚀 SERVER STARTED (Hybrid Mode)                  ║');
     console.log(`║   Port: ${PORT.toString().padEnd(44)}║`);
-    console.log('║   Storage: JSON (Reliable & Fast)                 ║');
-    console.log('╠════════════════════════════════════════════════════╣');
-    console.log('║   🔐 Password Authentication Enabled               ║');
-    console.log('║   🔒 Thread-Safe JSON Writes                       ║');
-    console.log('║   📊 Excel Export Available                        ║');
-    console.log('╠════════════════════════════════════════════════════╣');
-    console.log('║   POST /api/register - Submit registration        ║');
-    console.log('║   POST /api/admin/login - Admin login             ║');
-    console.log('║   GET  /api/admin/data - View registrations       ║');
-    console.log('║   GET  /api/admin/download - Download Excel       ║');
-    console.log('║   DELETE /api/admin/clear-all - Clear all data    ║');
-    console.log('║   GET  /api/health - Health check                 ║');
+    console.log('║   Storage: MongoDB Atlas + Local JSON/XLSX        ║');
     console.log('╚════════════════════════════════════════════════════╝\n');
-    console.log('🔑 Admin Password: CyberNova@2026\n');
   });
 })();
