@@ -58,7 +58,6 @@ export default function LandingPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 0.4 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
                         className="text-xl md:text-2xl text-gray-300 mb-8 md:mb-12 max-w-3xl mx-auto"
                     >
                         Where Cyber Security Meets Innovation
@@ -68,7 +67,6 @@ export default function LandingPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.6 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
                         className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8 md:mb-12"
                     >
@@ -116,7 +114,6 @@ export default function LandingPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 1 }}
-                        transition={{ duration: 0.8, delay: 1 }}
                         className="mt-2 md:mt-8 text-sm text-gray-400"
                     >
                         ⚡ Limited slots available • Free Registration
@@ -131,7 +128,6 @@ export default function LandingPage() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.6 }}
                         transition={{ duration: 0.6 }}
                         className="text-center mb-8 md:mb-12"
                     >
