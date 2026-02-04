@@ -109,8 +109,8 @@ export default function EventDetails() {
                             <div className="border border-cyan-500/30 bg-cyan-500/5 p-6 backdrop-blur-sm">
                                 <MapPin className="w-10 h-10 text-cyan-400 mb-4" />
                                 <div className="text-sm text-gray-400 mb-2">MODE</div>
-                                <div className="text-2xl tracking-tight">Hybrid</div>
-                                <div className="text-sm text-gray-500 mt-2">In-Person + Online Access</div>
+                                <div className="text-2xl tracking-tight">In-Person</div>
+                                <div className="text-sm text-gray-500 mt-2">On-Campus Experience</div>
                             </div>
 
                             <div className="border border-cyan-500/30 bg-cyan-500/5 p-6 backdrop-blur-sm">
@@ -131,22 +131,23 @@ export default function EventDetails() {
                             <h2 className="text-3xl md:text-4xl tracking-tight mb-8" style={{ fontWeight: 700 }}>
                                 VENUE DETAILS
                             </h2>
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="border border-cyan-500/30 bg-cyan-500/5 p-8 backdrop-blur-sm">
-                                    <h3 className="text-xl mb-4 text-cyan-400" style={{ fontWeight: 700 }}>
-                                        IN-PERSON VENUE
-                                    </h3>
-                                    <p className="text-gray-300 mb-2">Kalasalingam Academy of Research and Education</p>
-                                    <p className="text-gray-400 text-sm">Anand Nagar, Krishnankoil</p>
-                                    <p className="text-gray-400 text-sm">Srivilliputhur, Tamil Nadu 626126</p>
-                                </div>
-                                <div className="border border-cyan-500/30 bg-cyan-500/5 p-8 backdrop-blur-sm">
-                                    <h3 className="text-xl mb-4 text-cyan-400" style={{ fontWeight: 700 }}>
-                                        ONLINE ACCESS
-                                    </h3>
-                                    <p className="text-gray-300 mb-2">Live streaming available for all sessions</p>
-                                    <p className="text-gray-400 text-sm">Meeting links will be shared via email</p>
-                                    <p className="text-gray-400 text-sm">Interactive Q&A for online participants</p>
+                            <div className="border border-cyan-500/30 bg-cyan-500/5 p-8 backdrop-blur-sm w-full text-center">
+                                <h3 className="text-2xl mb-4 text-cyan-400" style={{ fontWeight: 700 }}>
+                                    IN-PERSON VENUE
+                                </h3>
+                                <p className="text-gray-300 mb-2 text-lg">Kalasalingam Academy of Research and Education</p>
+                                <p className="text-gray-400">Anand Nagar, Krishnankoil</p>
+                                <p className="text-gray-400">Srivilliputhur, Tamil Nadu 626126</p>
+
+                                <div className="mt-6 pt-6 border-t border-cyan-500/20 flex flex-wrap justify-center gap-8">
+                                    <div className="flex items-center gap-2 text-cyan-400/80">
+                                        <MapPin className="w-5 h-5" />
+                                        <span>Campus Map Available at Gate</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-cyan-400/80">
+                                        <Shield className="w-5 h-5" />
+                                        <span>ID Card Mandatory</span>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>

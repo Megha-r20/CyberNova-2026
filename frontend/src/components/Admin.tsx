@@ -20,11 +20,10 @@ export default function Admin() {
     const [loading, setLoading] = useState(false);
     const [authorized, setAuthorized] = useState(false);
 
-    // Login state
-    const [email, setEmail] = useState('');
+    // Login state - PASSWORD ONLY
     const [password, setPassword] = useState('');
     const [token, setToken] = useState<string | null>(null);
-    const [adminEmail, setAdminEmail] = useState('');
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
     // Pagination
     const [page, setPage] = useState(1);
@@ -35,34 +34,42 @@ export default function Admin() {
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleLogin = async () => {
+        if (!password.trim()) {
+            alert('Please enter a password');
+            return;
+        }
+
+        setIsLoggingIn(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+            // Hardcoded to 3002 to ensure we hit the new server
+            const apiUrl = 'http://localhost:3002';
             const response = await fetch(`${apiUrl}/api/admin/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ password: password })
             });
 
             const result = await response.json();
 
             if (result.success) {
                 setToken(result.token);
-                setAdminEmail(result.email);
                 setAuthorized(true);
                 fetchData(result.token);
             } else {
-                alert('❌ Invalid credentials');
+                alert('❌ ' + (result.message || 'Invalid password'));
             }
         } catch (error) {
             console.error('Login error:', error);
-            alert('❌ Login failed');
+            alert('❌ Network error. Is backend running?');
+        } finally {
+            setIsLoggingIn(false);
         }
     };
 
     const fetchData = async (authToken?: string) => {
         setLoading(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+            const apiUrl = 'http://localhost:3002';
             const response = await fetch(`${apiUrl}/api/admin/data`, {
                 headers: {
                     'Authorization': `Bearer ${authToken || token}`
@@ -91,7 +98,7 @@ export default function Admin() {
     const handleDeleteAll = async () => {
         setIsDeleting(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+            const apiUrl = 'http://localhost:3002';
             const response = await fetch(`${apiUrl}/api/admin/clear-all`, {
                 method: 'DELETE',
                 headers: {
@@ -116,9 +123,33 @@ export default function Admin() {
         }
     };
 
-    const handleDownload = () => {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-        window.open(`${apiUrl}/api/admin/download?token=${token}`, '_blank');
+    const handleDownload = async () => {
+        try {
+            const apiUrl = 'http://localhost:3002';
+            const response = await fetch(`${apiUrl}/api/admin/download`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'cybernova_registrations.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                alert('❌ Download failed');
+            }
+        } catch (error) {
+            console.error('Download error:', error);
+            alert('❌ Network error during download');
+        }
     };
 
     // Pagination calculations
@@ -144,18 +175,6 @@ export default function Admin() {
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-bold mb-2 text-cyan-400">EMAIL</label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-                                className="w-full p-3 bg-gray-900 border border-cyan-500/30 rounded text-white focus:outline-none focus:border-cyan-400"
-                                placeholder="admin@cybernova.com"
-                            />
-                        </div>
-
-                        <div>
                             <label className="block text-sm font-bold mb-2 text-cyan-400">PASSWORD</label>
                             <input
                                 type="password"
@@ -163,15 +182,24 @@ export default function Admin() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
                                 className="w-full p-3 bg-gray-900 border border-cyan-500/30 rounded text-white focus:outline-none focus:border-cyan-400"
-                                placeholder="Enter password"
+                                placeholder="Enter admin password"
+                                autoFocus
                             />
                         </div>
 
                         <button
                             onClick={handleLogin}
-                            className="w-full py-3 bg-cyan-500 text-black font-bold rounded hover:bg-cyan-400 transition-all"
+                            disabled={isLoggingIn}
+                            className="w-full py-3 bg-cyan-500 text-black font-bold rounded hover:bg-cyan-400 transition-all flex items-center justify-center gap-2"
                         >
-                            LOGIN
+                            {isLoggingIn ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    LOGGING IN...
+                                </>
+                            ) : (
+                                'LOGIN'
+                            )}
                         </button>
 
                         <button
@@ -182,13 +210,7 @@ export default function Admin() {
                         </button>
                     </div>
 
-                    <div className="mt-8 p-4 bg-cyan-500/10 border border-cyan-500/30 rounded">
-                        <p className="text-xs text-cyan-300 font-mono">
-                            <strong>Demo Accounts:</strong><br />
-                            • admin@cybernova.com / CyberNova@2026<br />
-                            • staff@cybernova.com / Staff@2026
-                        </p>
-                    </div>
+
                 </motion.div>
             </div>
         );
@@ -207,15 +229,28 @@ export default function Admin() {
                             <h1 className="text-4xl font-bold mb-2 text-cyan-400">
                                 ADMIN DASHBOARD
                             </h1>
-                            <p className="text-gray-400">Logged in as: {adminEmail}</p>
+                            <p className="text-gray-400">CyberNova Series 2026 • Secure Admin Area</p>
                         </div>
-                        <button
-                            onClick={() => navigate('/')}
-                            className="flex items-center gap-2 px-6 py-3 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-900/20 transition-all rounded"
-                        >
-                            <Home className="w-5 h-5" />
-                            <span className="font-bold">HOME</span>
-                        </button>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setAuthorized(false);
+                                    setToken(null);
+                                    setPassword('');
+                                }}
+                                className="flex items-center gap-2 px-6 py-3 border border-red-500/30 text-red-400 hover:bg-red-900/20 transition-all rounded"
+                            >
+                                <Lock className="w-5 h-5" />
+                                <span className="font-bold">LOGOUT</span>
+                            </button>
+                            <button
+                                onClick={() => navigate('/')}
+                                className="flex items-center gap-2 px-6 py-3 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-900/20 transition-all rounded"
+                            >
+                                <Home className="w-5 h-5" />
+                                <span className="font-bold">HOME</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -235,17 +270,7 @@ export default function Admin() {
                             >
                                 <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
                             </button>
-                            <button
-                                onClick={() => setShowDeleteConfirm(true)}
-                                disabled={registrations.length === 0}
-                                className={`p-3 border rounded transition-all ${registrations.length === 0
-                                        ? 'border-gray-700 text-gray-600 cursor-not-allowed'
-                                        : 'border-red-500/30 text-red-400 hover:bg-red-900/20'
-                                    }`}
-                                title="Delete All Data"
-                            >
-                                <Trash2 className="w-5 h-5" />
-                            </button>
+
                             <button
                                 onClick={handleDownload}
                                 className="flex items-center gap-2 px-6 py-3 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-400 hover:text-black transition-all rounded"
@@ -319,8 +344,8 @@ export default function Admin() {
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
                                     disabled={page === 1}
                                     className={`flex items-center gap-1 px-4 py-2 rounded transition-all ${page === 1
-                                            ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
-                                            : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-900/20'
+                                        ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                                        : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-900/20'
                                         }`}
                                 >
                                     <ChevronLeft className="w-4 h-4" />
@@ -335,8 +360,8 @@ export default function Admin() {
                                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                                     disabled={page === totalPages}
                                     className={`flex items-center gap-1 px-4 py-2 rounded transition-all ${page === totalPages
-                                            ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
-                                            : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-900/20'
+                                        ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                                        : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-900/20'
                                         }`}
                                 >
                                     NEXT

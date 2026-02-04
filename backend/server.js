@@ -14,7 +14,7 @@ const { Mutex } = require('async-mutex');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002; // CHANGED TO 3002 TO FIX STUCK PROCESS
 
 const DATA_DIR = path.join(__dirname, 'data');
 const JSON_FILE = path.join(DATA_DIR, 'registrations.json');
@@ -23,20 +23,9 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 /* ───────────────────────────────
-   MULTIPLE ADMINS
+   ADMIN PASSWORD
 ─────────────────────────────── */
-const ADMINS = [
-  {
-    email: 'admin@cybernova.com',
-    passwordHash: bcrypt.hashSync('CyberNova@2026', 10),
-    role: 'superadmin'
-  },
-  {
-    email: 'staff@cybernova.com',
-    passwordHash: bcrypt.hashSync('Staff@2026', 10),
-    role: 'admin'
-  }
-];
+const ADMIN_PASSWORD = 'CyberNova@2026'; // Change this to your desired password
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cybernova_secret_key';
 
@@ -89,26 +78,79 @@ function verifyAdmin(req, res, next) {
    ADMIN LOGIN
 ─────────────────────────────── */
 app.post('/api/admin/login', (req, res) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
 
-  const admin = ADMINS.find(a => a.email === email);
-  if (!admin || !bcrypt.compareSync(password, admin.passwordHash)) {
-    return res.status(401).json({ success: false, message: 'Invalid credentials' });
+  console.log('🔑 Login attempt. Password received:', password ? password.substring(0, 3) + '...' : 'undefined');
+  console.log('🔑 Expected:', ADMIN_PASSWORD.substring(0, 3) + '...');
+
+  if (password !== ADMIN_PASSWORD) {
+    console.log('❌ Password mismatch');
+    return res.status(401).json({ success: false, message: 'Invalid password' });
   }
 
   const token = jwt.sign(
-    { email: admin.email, role: admin.role },
+    { admin: true },
     JWT_SECRET,
     { expiresIn: '6h' }
   );
 
-  res.json({ success: true, token, email: admin.email, role: admin.role });
+  res.json({ success: true, token });
 });
 
 /* ───────────────────────────────
    REGISTER USER (THREAD SAFE)
 ─────────────────────────────── */
 const mutex = new Mutex();
+
+const EXCEL_FILE = path.join(DATA_DIR, 'cybernova_registrations.xlsx');
+
+/* ───────────────────────────────
+   SYNC TO EXCEL (BEST EFFORT)
+─────────────────────────────── */
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function syncToExcel(data) {
+  let attempt = 0;
+  while (attempt < MAX_RETRIES) {
+    try {
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet('Registrations');
+
+      ws.columns = [
+        { header: 'Full Name', key: 'fullName', width: 25 },
+        { header: 'Registration Number', key: 'registrationNumber', width: 20 },
+        { header: 'Email', key: 'email', width: 30 },
+        { header: 'Year', key: 'year', width: 10 },
+        { header: 'Section', key: 'section', width: 10 },
+        { header: 'Mobile', key: 'mobile', width: 15 },
+        { header: 'WhatsApp', key: 'whatsappJoined', width: 15 },
+        { header: 'Timestamp', key: 'timestamp', width: 25 }
+      ];
+
+      ws.getRow(1).font = { bold: true };
+      data.forEach(row => ws.addRow(row));
+
+      await wb.xlsx.writeFile(EXCEL_FILE);
+      console.log('📊 Excel file updated automatically');
+      return; // Success, exit function
+    } catch (error) {
+      attempt++;
+      console.error(`⚠️ Excel sync failed (Attempt ${attempt}/${MAX_RETRIES}):`, error.message);
+
+      if (attempt < MAX_RETRIES) {
+        console.log(`⏳ Retrying in ${RETRY_DELAY / 1000}s...`);
+        await sleep(RETRY_DELAY);
+      } else {
+        console.error('❌ Excel sync gave up after max retries. Data is saved in JSON but EXCEL IS OUT OF SYNC.');
+      }
+    }
+  }
+}
 
 app.post('/api/register', async (req, res) => {
   try {
@@ -144,6 +186,9 @@ app.post('/api/register', async (req, res) => {
       }
 
       console.log('✅ Registration saved and verified:', data.fullName);
+
+      // Auto-update Excel (Fire and forget, but await to ensure order in mutex)
+      await syncToExcel(registrations);
     });
 
     res.status(201).json({ success: true, message: 'Registration successful' });
@@ -223,6 +268,21 @@ app.delete('/api/admin/clear-all', verifyAdmin, async (req, res) => {
 });
 
 /* ───────────────────────────────
+   FORCE SYNC EXCEL
+─────────────────────────────── */
+app.post('/api/admin/sync-excel', verifyAdmin, async (req, res) => {
+  try {
+    const data = await readData();
+    await syncToExcel(data);
+
+    res.json({ success: true, message: 'Excel sync triggered manually' });
+  } catch (error) {
+    console.error('❌ Manual sync error:', error);
+    res.status(500).json({ success: false, message: 'Manual sync failed: ' + error.message });
+  }
+});
+
+/* ───────────────────────────────
    HEALTH CHECK
 ─────────────────────────────── */
 app.get('/api/health', (req, res) => {
@@ -242,12 +302,12 @@ app.get('/api/health', (req, res) => {
     console.log('\n╔════════════════════════════════════════════════════╗');
     console.log('║   CYBERNOVA SERIES 2026 - BACKEND API SERVER      ║');
     console.log('╠════════════════════════════════════════════════════╣');
-    console.log(`║   Status: RUNNING                                  ║`);
+    console.log('║   🚀 SERVER RESTARTED - VERSION 3.0 (FIXED)        ║');
+    console.log(`║   🕒 Time: ${new Date().toLocaleTimeString()}                    ║`);
     console.log(`║   Port: ${PORT.toString().padEnd(44)}║`);
     console.log('║   Storage: JSON (Reliable & Fast)                 ║');
     console.log('╠════════════════════════════════════════════════════╣');
-    console.log('║   🔐 JWT Authentication Enabled                    ║');
-    console.log('║   👥 Multiple Admin Support                        ║');
+    console.log('║   🔐 Password Authentication Enabled               ║');
     console.log('║   🔒 Thread-Safe JSON Writes                       ║');
     console.log('║   📊 Excel Export Available                        ║');
     console.log('╠════════════════════════════════════════════════════╣');
@@ -258,8 +318,6 @@ app.get('/api/health', (req, res) => {
     console.log('║   DELETE /api/admin/clear-all - Clear all data    ║');
     console.log('║   GET  /api/health - Health check                 ║');
     console.log('╚════════════════════════════════════════════════════╝\n');
-    console.log('📧 Admin Accounts:');
-    console.log('   • admin@cybernova.com (CyberNova@2026)');
-    console.log('   • staff@cybernova.com (Staff@2026)\n');
+    console.log('🔑 Admin Password: CyberNova@2026\n');
   });
 })();

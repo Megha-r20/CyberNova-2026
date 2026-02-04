@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login Test</title>
+    <style>
+        body {
+            background: #000;
+            color: #0fa;
+            font-family: monospace;
+            padding: 20px;
+        }
+
+        input,
+        button {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        #log {
+            white-space: pre-wrap;
+            margin-top: 20px;
+            border: 1px solid #333;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Login Diagnostic Tool</h1>
+    <input type="password" id="pwd" placeholder="Enter Password" value="CyberNova@2026">
+    <button onclick="tryLogin()">Test Login</button>
+    <div id="log">Waiting...</div>
+
+    <script>
+        async function tryLogin() {
+            const pwd = document.getElementById('pwd').value;
+            const log = document.getElementById('log');
+
+            log.innerText = "Sending request...\n";
+            log.innerText += "Payload: " + JSON.stringify({ password: pwd }) + "\n\n";
+
+            try {
+                const res = await fetch('http://localhost:3002/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pwd })
+                });
+
+                const data = await res.json();
+                log.innerText += "Status: " + res.status + "\n";
+                log.innerText += "Response: " + JSON.stringify(data, null, 2);
+
+                if (data.success) {
+                    log.style.color = '#0fa';
+                    log.innerText += "\n\n✅ LOGIN SUCCESSFUL!";
+                } else {
+                    log.style.color = '#f55';
+                    log.innerText += "\n\n❌ LOGIN FAILED";
+                }
+            } catch (err) {
+                log.style.color = '#f55';
+                log.innerText += "Error: " + err.message;
+            }
+        }
+    </script>
+</body>
+
+</html>

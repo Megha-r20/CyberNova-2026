@@ -27,7 +27,7 @@ export default function LandingPage() {
                         className="inline-flex items-center gap-2 px-4 py-2 mb-8 border border-cyan-500/50 bg-cyan-500/10 rounded-full"
                     >
                         <Zap className="w-4 h-4 text-cyan-400" />
-                        <span className="text-sm tracking-wider text-cyan-400">HYBRID EVENT • LIMITED SLOTS</span>
+                        <span className="text-sm tracking-wider text-cyan-400">IN-PERSON EVENT • LIMITED SLOTS</span>
                     </motion.div>
 
                     {/* Main Headline */}
@@ -81,7 +81,7 @@ export default function LandingPage() {
                         <div className="border border-cyan-500/30 bg-cyan-500/5 p-6 backdrop-blur-sm">
                             <MapPin className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
                             <div className="text-sm text-gray-400 mb-1">MODE</div>
-                            <div className="text-xl tracking-tight">Hybrid Event</div>
+                            <div className="text-xl tracking-tight">In-Person Event</div>
                         </div>
                     </motion.div>
 
@@ -140,11 +140,15 @@ export default function LandingPage() {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.6 }}
-                            className="border border-cyan-500/30 bg-cyan-500/5 p-8 backdrop-blur-sm"
+                            className="border border-cyan-500/30 bg-cyan-500/5 p-8 backdrop-blur-sm flex flex-col items-center justify-center text-center group hover:bg-cyan-500/10 transition-all duration-300"
                         >
-                            <Shield className="w-12 h-12 text-cyan-400 mb-4" />
-                            <h3 className="text-2xl mb-2" style={{ fontWeight: 700 }}>OWASP & CyberNerds</h3>
-                            <p className="text-gray-400">Student Chapter</p>
+                            <img
+                                src="/owasp-logo.png"
+                                alt="OWASP Logo"
+                                className="h-20 w-auto object-contain filter brightness-0 invert mb-6 group-hover:scale-110 transition-transform duration-300"
+                            />
+                            <h3 className="text-xl mb-1" style={{ fontWeight: 700 }}>OWASP</h3>
+                            <p className="text-gray-400 text-sm">KARE Student Chapter</p>
                         </motion.div>
 
                         <motion.div
@@ -152,11 +156,15 @@ export default function LandingPage() {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.6 }}
-                            className="border border-cyan-500/30 bg-cyan-500/5 p-8 backdrop-blur-sm"
+                            className="border border-cyan-500/30 bg-cyan-500/5 p-8 backdrop-blur-sm flex flex-col items-center justify-center text-center group hover:bg-cyan-500/10 transition-all duration-300"
                         >
-                            <Users className="w-12 h-12 text-cyan-400 mb-4" />
-                            <h3 className="text-2xl mb-2" style={{ fontWeight: 700 }}>KARE</h3>
-                            <p className="text-gray-400">Kalasalingam Academy of Research and Education</p>
+                            <img
+                                src="/cybernerds-logo.png"
+                                alt="CyberNerds Logo"
+                                className="h-20 w-auto object-contain filter brightness-0 invert mb-6 group-hover:scale-110 transition-transform duration-300"
+                            />
+                            <h3 className="text-xl mb-1" style={{ fontWeight: 700 }}>CyberNerds</h3>
+                            <p className="text-gray-400 text-sm">KARE Student Chapter</p>
                         </motion.div>
                     </div>
                 </div>
