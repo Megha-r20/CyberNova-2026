@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, Users, MapPin, Shield, Code, AlertTriangle, Eye, Wrench, BookOpen, ArrowRight, Home } from 'lucide-react';

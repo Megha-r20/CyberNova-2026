@@ -1,6 +1,8 @@
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Users, Calendar, Clock, MapPin, Zap } from 'lucide-react';
+import { Calendar, MapPin, Zap, Clock } from "lucide-react";
+
+
 
 export default function LandingPage() {
     const navigate = useNavigate();
