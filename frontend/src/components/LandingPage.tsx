@@ -19,7 +19,7 @@ export default function LandingPage() {
             </div>
 
             {/* Hero Section */}
-            <section className="relative min-h-screen flex items-center justify-center px-4 py-20">
+            <section className="relative md:min-h-screen flex items-center justify-center px-4 py-16 md:py-20">
                 <div className="max-w-7xl mx-auto text-center">
                     {/* Top Badge */}
                     <motion.div
@@ -122,7 +122,7 @@ export default function LandingPage() {
             </section>
 
             {/* Credibility Section */}
-            <section className="relative py-20 px-4 border-t border-cyan-500/20">
+            <section className="relative py-12 md:py-20 px-4 border-t border-cyan-500/20">
                 <div className="max-w-7xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
